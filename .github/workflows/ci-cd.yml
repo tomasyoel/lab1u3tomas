@@ -1,0 +1,67 @@
+name: Deploy Blazor + Azure Functions
+
+on:
+  push:
+    branches:
+      - main  # Asegúrate de que esta es la rama correcta
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 🔹 Checkout código
+      uses: actions/checkout@v3
+
+    - name: 🔹 Configurar .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x  # Asegúrate de usar la versión correcta
+
+    # 🚀 DEPLOY DEL FRONTEND (Blazor WASM en Azure Static Web Apps)
+    - name: 🔹 Restaurar dependencias
+      run: dotnet restore src/ShortenApp
+
+    - name: 🔹 Publicar Blazor WASM
+      run: dotnet publish src/ShortenApp -c Release -o publish
+
+    - name: 🔹 Desplegar en Azure Static Web Apps
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+        action: "upload"
+        app_location: "publish/wwwroot"
+        skip_app_build: true
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy  # Espera a que termine el frontend
+    steps:
+    - name: 🔹 Checkout código
+      uses: actions/checkout@v3
+
+    - name: 🔹 Configurar Azure CLI
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # 🚀 CONFIGURAR SETTINGS EN AZURE FUNCTIONS
+    - name: 🔹 Configurar settings en Azure Functions
+      run: |
+        az webapp config connection-string set -g upt-arg-399 -n upt-afn-399 -t SQLAzure --settings ShortenDB='Data Source=upt-dbs-399.database.windows.net;User ID=${{ secrets.SQL_USER }};Password=${{ secrets.SQL_PASS }};Database=shorten'
+
+    # 🚀 PUBLICAR EL BACKEND (Azure Functions)
+    - name: 🔹 Publicar Azure Functions
+      run: |
+        dotnet publish src/ShortenFunction -c Release -o publish_backend
+        cd publish_backend
+        zip -r functionapp.zip .  # Comprime correctamente
+
+    - name: 🔹 Desplegar en Azure Functions
+      run: |
+        az functionapp deployment source config-zip -g upt-arg-399 -n upt-afn-399 --src publish_backend/functionapp.zip --verbose
+
+    # 🔹 MOSTRAR URL DEL BACKEND
+    - name: 🔹 Mostrar URL del backend
+      run: |
+        BACKEND_URL=$(az functionapp show -g upt-arg-399 -n upt-afn-399 --query "defaultHostName" -o tsv)
+        echo "🔗 La API está disponible en: https://$BACKEND_URL"

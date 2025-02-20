@@ -1,0 +1,5 @@
+C:\Users\MrMiau\Pictures\lab1u3tomas\src\ShortenApp\publish\publish\web.config
+C:\Users\MrMiau\Pictures\lab1u3tomas\src\ShortenApp\publish\publish\ShortenApp.staticwebassets.endpoints.json
+C:\Users\MrMiau\Pictures\lab1u3tomas\src\ShortenApp\publish\publish\wwwroot\sample-data\weather.json
+C:\Users\MrMiau\Pictures\lab1u3tomas\src\ShortenApp\publish\publish\wwwroot\_framework\blazor.boot.json
+C:\Users\MrMiau\Pictures\lab1u3tomas\src\ShortenApp\publish\web.config
