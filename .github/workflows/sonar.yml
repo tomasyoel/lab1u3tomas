@@ -21,7 +21,7 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Necesario para un análisis preciso en SonarCloud
+          fetch-depth: 0
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
